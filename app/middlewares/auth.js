@@ -49,7 +49,7 @@ var config = require('../../config/config'),
 
  	// Compare generated signature to provided signature..
  	if (generatedSignature != providedSignature) {
- 		res.jerror('You are not authorized');
+ 		res.jerror('You are not authorized (maybe check signatures)');
  		return;
  	}
 
@@ -58,6 +58,14 @@ var config = require('../../config/config'),
 
  	next();
  }
+
+/**
+ * Check that the token provided is valid.
+ * TO DO
+ */
+module.exports.validateSocketToken = function(socket, next){
+    // insert code, similar to validateToken, but for WS
+}
  
 /**
  * Generate a token corresponding to the user information provided
@@ -88,4 +96,6 @@ var config = require('../../config/config'),
 
                   console.log(`Generate token: ${newToken}`);
       return newToken;
+      // next();
  }
+

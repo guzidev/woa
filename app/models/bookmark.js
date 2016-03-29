@@ -5,8 +5,7 @@ var mongoose = require('mongoose'),
 
 var BookmarkSchema = new Schema({
   title: 		{ type: String, required: true },
-  url: 			{ type: String, required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  url: 			{ type: String, required: true }
 }); 
 
 mongoose.model('Bookmark', BookmarkSchema);
