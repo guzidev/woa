@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+    <link rel="stylesheet" href="http://cdn.webix.com/edge/webix.css" type="text/css"> 
+    <script src="http://cdn.webix.com/edge/webix.js" type="text/javascript"></script>  
+    <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+        
+    </head>
+    <body>
+        <script type="text/javascript" charset="utf-8">
+        
+            webix.ready(function(){
+                var token = localStorage.getItem("token");
+
+                webix.ajax("/text/ui", function(data){
+                    data = JSON.parse(data);
+                    webix.ui({
+                        "id":"main",
+                        "rows": data.data   
+                    });
+                   });
+
+                // Login webix UI..
+ 				webix.ajax("/auth/login", function(data){
+ 					data = JSON.parse(data);
+ 					webix.ui(data.data,$$("main"));
+ 				// POST /auth when login form is submitted..
+	            $$("loginForm.submit").attachEvent("onItemClick", function (){
+	            	var formUsr = $$("username").getValue();
+	            	var formPwd = $$("password").getValue();
+                    webix.ajax().post("/auth/", {username : formUsr, password : formPwd }, function(text, xml, xhr){
+    						var data = JSON.parse(text);
+    						var token = data.data.token;
+    						localStorage.setItem('token',token);
+						});
+					});
+				});         	
+
+            });
+
+        // TO DO : handle user login form, and setting token in local storage
+        // TO DO : complete frontend display of webix info, from the various apps 
+        </script>
+    </body>
+</html>

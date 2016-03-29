@@ -3,13 +3,18 @@ var config = require('../../config/config'),
 	crypto = require('crypto'),
   	jsend = require('express-jsend'),
   	mongoose = require('mongoose'),
+  	jwt = require('jsonwebtoken'),
 	User = mongoose.model('User');
+
+
+  var secret;
 
 /**
  * Check that the token provided is valid.
  * Tokens can be provided via :
  * 1) url query, as "token" value
  * 2) Authorization header
+ * TO DO : handle limited validity date for tokens
  */
  module.exports.validateToken = function(req, res, next) {
  	var token;
@@ -52,4 +57,35 @@ var config = require('../../config/config'),
  	req.body = payload;
 
  	next();
+ }
+ 
+/**
+ * Generate a token corresponding to the user information provided
+ * User info must include "username" and "password"
+ */
+ module.exports.generateToken = function(userInfo) {
+ 	      var header = {
+        "alg": "HS256",
+        "typ": "JWT"
+      }
+
+      console.log(`Usr: ${userInfo.username}`);
+      var payload = {
+          "username": userInfo.username,
+          "password": userInfo.password
+      }
+
+      console.log(`Secret: ${config.secret}`);
+
+      var signature = crypto.createHmac('sha256', config.secret)
+        .update(base64url(JSON.stringify(header)) + "." +
+                base64url(JSON.stringify(payload)))
+        .digest('bin');
+
+      var newToken = base64url(JSON.stringify(header)) + "." +
+                  base64url(JSON.stringify(payload)) + "." +
+                  base64url(signature);
+
+                  console.log(`Generate token: ${newToken}`);
+      return newToken;
  }

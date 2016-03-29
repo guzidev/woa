@@ -31,22 +31,6 @@ router.get('/uijson', function(req, res){
 }); 
 */
 
-router.get('/uijade', function(req, res) {
-  
-  var criteria = {};
-   Bookmark.find(criteria)
-              .sort('value')
-              .exec(function(err, bookmarks){
-                if (err) {
-                  res.status(500).send(err);
-                  return;
-                }
-                console.log(bookmarks);
-                res.render('ui.jade', {locals: {bookmarks: bookmarks, status: 'success'}});
-});
-
-});
-
 router.get('/ui', function(req, res) {
   
   var options = {

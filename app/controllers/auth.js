@@ -19,13 +19,26 @@ module.exports = function (app) {
   app.use('/auth', router);
 };
 
-
-function getUi (req, res, next) {
-  var ui;
-  // to do...
-
-  res.send(ui);
-}
+/**
+  * Handles login form
+  * TO DO : handle login, and new user creation
+  */
+router.get('/login', function(req, res, next){
+  // Config for UI..
+  var ui = {
+    view: 'form',
+    id: 'loginForm',
+    //width: '400',
+    elements: [
+      { view: 'text', label: 'username', id: 'username'},
+      { view: 'text', label: 'password', type: 'password', id: 'password'},
+      { margins: 5, cols: [
+          { view: 'button', value: 'Login', type: 'form', id: 'loginForm.submit'}
+        ]},
+    ]
+  };
+  res.jsend(ui);
+})
 
 
 /**
@@ -40,45 +53,23 @@ router.get('/user', mAuth.validateToken, function(req, res, next) {
 });
 
 /**
-  * 
+  * Page that generates JSON web tokens for existing users
   *
   */
 router.post('/', function (req, res, next) {
-  // check user exists
+  // Check user exists
   var username = req.query.username;
   var password = req.query.password;
-
   User.findOne(function(err, existingUser){
     if(err){
       res.jerror(new Error('You are not authorised to be here'));
       return;
     }
-
-    // Generate JW Token..
     if(existingUser){
-      var header = {
-        "alg": "HS256",
-        "typ": "JWT"
-      }
-      var payload = {
-          "username": username,
-          "password": password
-      }
-
-      console.log(`Secret: ${config.secret}`);
-
-      var signature = crypto.createHmac('sha256', config.secret)
-        .update(base64url(JSON.stringify(header)) + "." +
-                base64url(JSON.stringify(payload)))
-        .digest('bin');
-
-      var newToken = base64url(JSON.stringify(header)) + "." +
-                  base64url(JSON.stringify(payload)) + "." +
-                  base64url(signature);
-
-                  //console.log(`Token: ${token}`);
-      res.jsend(newToken);
+      // Send newly generated token..
+      res.jsend(mAuth.generateToken(existingUser));
     } else {
+      // Send error..
       res.jerror(new Error('Login fail'))
     }
 
