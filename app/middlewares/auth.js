@@ -6,8 +6,10 @@ var config = require('../../config/config'),
 	User = mongoose.model('User');
 
 /**
- * Check that the token provided is valid
- *
+ * Check that the token provided is valid.
+ * Tokens can be provided via :
+ * 1) url query, as "token" value
+ * 2) Authorization header
  */
  module.exports.validateToken = function(req, res, next) {
  	var token;

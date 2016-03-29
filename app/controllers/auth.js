@@ -10,7 +10,7 @@ var express = require('express'),
   crypto = require('crypto'),
   base64url = require('base64url'),
   jsend = require('express-jsend'),
-  authentification = require('../middlewares/auth'),
+  mAuth = require('../middlewares/auth'),
   User = mongoose.model('User');
 
   var secret;
@@ -30,10 +30,9 @@ function getUi (req, res, next) {
 
 /**
  * Displays welcome message to the user that passes authentification, according to the token provided.
- * Tokens can be passed via URL query or via Header (Authentification).
+ * Tokens can be passed via URL query (with token query) or via Authorization Header.
  */
-router.get('/user', authentification.validateToken, function(req, res, next) {
-
+router.get('/user', mAuth.validateToken, function(req, res, next) {
     //console.log(`Unparsed payload: ${req.body}`);
     var payload = base64url.decode(req.body);
     var data = JSON.parse(payload);
@@ -44,38 +43,45 @@ router.get('/user', authentification.validateToken, function(req, res, next) {
   * 
   *
   */
-router.post('/login', function (req, res, next) {
+router.post('/', function (req, res, next) {
   // check user exists
   var username = req.query.username;
   var password = req.query.password;
-  // TO DO : check user exists with database
-  if(username != "juser" || password != "123456" ){
-        //res.status(403).send('You are not authorised to be here');
-        res.jerror(new Error('You are not authorised to be here'));
-  }
 
-  // Generate JW Token..
-  var header = {
-      "alg": "HS256",
-      "typ": "JWT"
-  }
-  var payload = {
-      "username": username,
-      "password": password
-  }
+  User.findOne(function(err, existingUser){
+    if(err){
+      res.jerror(new Error('You are not authorised to be here'));
+      return;
+    }
 
-  console.log(`Secret: ${config.secret}`);
+    // Generate JW Token..
+    if(existingUser){
+      var header = {
+        "alg": "HS256",
+        "typ": "JWT"
+      }
+      var payload = {
+          "username": username,
+          "password": password
+      }
 
-  var signature = crypto.createHmac('sha256', config.secret)
-    .update(base64url(JSON.stringify(header)) + "." +
-            base64url(JSON.stringify(payload)))
-    .digest('bin');
+      console.log(`Secret: ${config.secret}`);
 
-  var newToken = base64url(JSON.stringify(header)) + "." +
-              base64url(JSON.stringify(payload)) + "." +
-              base64url(signature);
+      var signature = crypto.createHmac('sha256', config.secret)
+        .update(base64url(JSON.stringify(header)) + "." +
+                base64url(JSON.stringify(payload)))
+        .digest('bin');
 
-              //console.log(`Token: ${token}`);
+      var newToken = base64url(JSON.stringify(header)) + "." +
+                  base64url(JSON.stringify(payload)) + "." +
+                  base64url(signature);
 
-  res.jsend(newToken);
+                  //console.log(`Token: ${token}`);
+      res.jsend(newToken);
+    } else {
+      res.jerror(new Error('Login fail'))
+    }
+
+  })
+  
 });
