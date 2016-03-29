@@ -19,6 +19,8 @@ $ grunt
 - Complete frontend displaying of content, via Webix
 - Complete WS connection for Checklist functionality
 - Replace TO DO instructions with code
+- Make JSON "search bar" webservice
+- Make "text generator" for DB population
 
 ## License
 MIT
